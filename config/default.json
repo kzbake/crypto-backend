@@ -1,6 +1,6 @@
 {
   "env": "dev",
-  "port": 3005,
+  "port": 3100,
   "url": "http://localhost:4200",
   "mongodb": "mongodb://localhost:27017/crypto-network",
   "jwt_expiretime": 36000,
