@@ -1,0 +1,9 @@
+{
+  "env": "prod",
+  "port": 3005,
+  "url": "http://localhost:4200",
+  "mongodb": "mongodb://localhost:27017/crypto-network",
+  "jwt_expiretime": 36000,
+  "auth-max-fail-count": 20,
+  "company_name": "WorldBet"
+}
