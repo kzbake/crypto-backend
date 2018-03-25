@@ -2,7 +2,6 @@
 
 const db = require('../lib/db')
 const httpStatus = require('http-status-codes')
-const randomstring = require('randomstring')
 const mongoose = require('mongoose')
 const logger = require('../lib/logger')
 const Promise = require('bluebird')
@@ -45,20 +44,43 @@ module.exports.addTransaction = (req, res) => {
 };
 
 
-module.exports.Test = (req, res) => {
-    var options = {
-        host: 'http://localhost',
-        port: 3000,
-        path: '/api/transferAsset',
-        method: 'GET'
-    };
+module.exports.FetchToHyperledger = (req, res) => {
+    const methodName = '[FetchToHyperledger]'
+  return TransactionModel.find({Transfered: false}).populate("walletId").exec().then(txs => {
+    if(!txs[0]) {
+        return res.send({msg: 'Nothing to fetch'});
+    }
+    const arr = []
+    for(let tx of txs) {
+      let body = {
+          "$class": "org.acme.biznet.transferAsset",
+          "transactionId": tx.transactionId,
+          "transfer": {
+              "$class": "org.acme.biznet.transfer",
+              "addressTo": tx.transfer.addressTo,
+              "Amount": tx.transfer.Amount,
+              "id": tx.transactionId
+          },
+          "date": Date.now(),
+          "Status": "active",
+          "fromWallet": {
+              "$class": "org.acme.biznet.Wallet",
+              "address": tx.walletId.address,
+              "Balance": tx.walletId.amount,
+              "id": tx.walletId._id,
+              "userId": 0
+          }
+      }
+      arr.push(axios.post('http://localhost:3000/api/transferAsset', body));
+    }
+    return Promise.all(arr).then(result => {
+      TransactionModel.update({Transfered:true}, {multi: true}).then(result => {
+          return res.send({msg: 'Successfully fetched to Hyperledger'});
+      });
 
-    http.request(options, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.setEncoding('utf8');
-        res.on('data', function (chunk) {
-            console.log('BODY: ' + chunk);
-        });
-    }).end();
-}
+    }).catch((err) => {
+        logger.error(loggerName, methodName, err)
+        return res.status(httpStatus.BAD_REQUEST).json('Error, couldnt fetch data to Hyperledger!')
+    });
+  });
+};

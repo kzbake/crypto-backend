@@ -5,6 +5,6 @@ const cryptoController = require('../controllers/cryptoController')
 
 router.post('/add-wallet', cryptoController.addWallet)
 router.post('/add-transaction', cryptoController.addTransaction)
-router.get('/test', cryptoController.Test)
+router.get('/fetch', cryptoController.FetchToHyperledger)
 
 module.exports = router
