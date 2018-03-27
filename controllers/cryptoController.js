@@ -29,20 +29,26 @@ module.exports.addTransaction = (req, res) => {
   const methodName = '[AddTransaction]'
 
   const transaction = req.body;
-  WalletModel.findOne({walletId: transaction.walletId}).exec().then(wallet => {
-    if(!wallet) {
-        return res.status(httpStatus.BAD_REQUEST).json('Wallet not found!');
-    }
-    transaction.walletId = wallet;
-    const model = new TransactionModel(transaction);
-    return model.save().then(result => {
-        emitter.emit('send', result._doc)
-        return res.send(wallet);
-    }).catch((err) => {
-        logger.error(loggerName, methodName, err)
-        return res.status(httpStatus.BAD_REQUEST).json('Bad request')
-    })
-  });
+  TransactionModel.findOne({transactionId: transaction.transactionId}).exec().then(tx => {
+      if(tx) {
+          return res.status(httpStatus.BAD_REQUEST).send('Transaction already exists')
+      }
+      WalletModel.findOne({walletId: transaction.walletId}).exec().then(wallet => {
+          if(!wallet) {
+              return res.status(httpStatus.BAD_REQUEST).json('Wallet not found!');
+          }
+          transaction.walletId = wallet;
+          const model = new TransactionModel(transaction);
+          return model.save().then(result => {
+              emitter.emit('send', result._doc)
+              return res.send(wallet);
+          }).catch((err) => {
+              logger.error(loggerName, methodName, err)
+              return res.status(httpStatus.BAD_REQUEST).json('Couldnt')
+          })
+      });
+  })
+
 };
 
 
