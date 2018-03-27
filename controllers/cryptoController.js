@@ -4,6 +4,7 @@ const db = require('../lib/db')
 const httpStatus = require('http-status-codes')
 const mongoose = require('mongoose')
 const logger = require('../lib/logger')
+const emitter = require('../lib/emitter')
 const Promise = require('bluebird')
 const WalletModel = db.model('Wallet');
 const TransactionModel = db.model('Transactions');
@@ -15,7 +16,7 @@ module.exports.addWallet = (req, res) => {
 
   const wallet = req.body;
   const model = new WalletModel(wallet);
-  return model.save(wallet).then(result => {
+  return model.save().then(result => {
       return res.send(wallet);
   }).catch((err) => {
       logger.error(loggerName, methodName, err)
@@ -34,7 +35,8 @@ module.exports.addTransaction = (req, res) => {
     }
     transaction.walletId = wallet;
     const model = new TransactionModel(transaction);
-    return model.save(wallet).then(result => {
+    return model.save().then(result => {
+        emitter.emit('send', result._doc)
         return res.send(wallet);
     }).catch((err) => {
         logger.error(loggerName, methodName, err)

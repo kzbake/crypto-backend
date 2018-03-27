@@ -57,3 +57,4 @@ logger.debug('[Server]', 'Server running mode', config.get('env'))
 module.exports = app
 
 require('./lib/TransferJob')
+require('./listeners/ioListener')

@@ -6,6 +6,7 @@ const debug = require('debug')('ico-backend:server')
 const logger = require('../lib/logger')
 const config = require('config')
 const http = require('http')
+const io = require('../lib/io')
 
 /**
  * Get port from environment and store in Express.
@@ -19,7 +20,8 @@ logger.debug('[Server]', 'HTTP server running in port', port)
  * Create HTTP server.
  */
 
-const server = http.createServer(app)
+const server = http.createServer(app);
+io.socket_io(server);
 
 
 /**
