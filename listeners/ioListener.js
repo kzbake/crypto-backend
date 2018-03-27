@@ -11,11 +11,11 @@ emitter.on('send', (transaction) => {
     io.emit(socketChannel, transaction)
 })
 
-emitter.on('updateTemporaryStatus', (country) => {
+emitter.on('fetch', (transaction) => {
     const io = global.io
     const methodName = '[updateTemporaryStatus]'
-    const socketChannel = 'updateTemporaryStatus' + country
-    io.emit(socketChannel, country)
+    const socketChannel = 'fetch'
+    io.emit(socketChannel, transaction)
 })
 
 
